@@ -11,7 +11,7 @@ new Vue({
             phone: ''
         },
         confirmation: '',
-        apiBaseUrl: 'http://localhost:3000' // Your backend API URL
+        apiBaseUrl: 'https://shopping-backend-express.onrender.com' // Your backend API URL
     },
     computed: {
         sortedLessons() {
