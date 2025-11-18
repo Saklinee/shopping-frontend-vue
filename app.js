@@ -22,7 +22,7 @@ new Vue({
     apiBaseUrl: 'https://shopping-backend-express.onrender.com'
   },
   computed: {
-    // Now only sorts; filtering is done by the backend /search route
+    // Sorts the lessons returned from the backend (all or search results)
     sortedLessons() {
       return [...this.lessons].sort((a, b) => {
         const modifier = this.sortDir === 'asc' ? 1 : -1;
@@ -38,6 +38,14 @@ new Vue({
     validPhone() {
       // Regex to allow only numbers
       return /^\d+$/.test(this.customer.phone);
+    },
+    // New: total value of items in the cart
+    cartTotal() {
+      // Sum of lesson prices; adjust if you later add quantity
+      return this.cart.reduce(
+        (sum, item) => sum + Number(item.price || 0),
+        0
+      );
     }
   },
   watch: {
@@ -190,3 +198,4 @@ new Vue({
     this.fetchLessons();
   }
 });
+
