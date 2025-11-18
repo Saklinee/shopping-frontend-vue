@@ -10,6 +10,12 @@ new Vue({
       name: '',
       phone: ''
     },
+    // New: fake payment details (front-end only)
+    payment: {
+      cardNumber: '',
+      expiry: '',
+      cvc: ''
+    },
     confirmation: '',
     // Search text from the input
     searchText: '',
@@ -45,6 +51,34 @@ new Vue({
       return this.cart.reduce(
         (sum, item) => sum + Number(item.price || 0),
         0
+      );
+    },
+    // New: fake card number validation (16 digits, spaces allowed)
+    validCard() {
+      const digits = this.payment.cardNumber.replace(/\s+/g, '');
+      return /^\d{16}$/.test(digits);
+    },
+    // New: fake expiry validation (MM/YY, 01–12)
+    validExpiry() {
+      const match = /^(\d{2})\/(\d{2})$/.exec(this.payment.expiry);
+      if (!match) return false;
+      const month = Number(match[1]);
+      return month >= 1 && month <= 12;
+    },
+    // New: fake CVC validation (3–4 digits)
+    validCvc() {
+      return /^\d{3,4}$/.test(this.payment.cvc);
+    },
+    // New: single place to control when checkout button is disabled
+    checkoutDisabled() {
+      return (
+        !this.validName ||
+        !this.validPhone ||
+        !this.validCard ||
+        !this.validExpiry ||
+        !this.validCvc ||
+        this.cart.length === 0 ||
+        this.isCheckingOut
       );
     }
   },
@@ -90,6 +124,7 @@ new Vue({
     // ----- Checkout helpers -----
 
     buildOrderPayload() {
+      // Note: payment details are NOT sent to the backend (demo only)
       return {
         name: this.customer.name,
         phone: this.customer.phone,
@@ -122,10 +157,13 @@ new Vue({
     },
 
     handleCheckoutSuccess() {
-      this.confirmation = 'Your order has been placed!';
+      this.confirmation = 'Your order has been placed! (Demo payment processed)';
       this.cart = [];
       this.customer.name = '';
       this.customer.phone = '';
+      this.payment.cardNumber = '';
+      this.payment.expiry = '';
+      this.payment.cvc = '';
     },
 
     handleCheckoutError(error) {
@@ -134,8 +172,8 @@ new Vue({
     },
 
     async checkout() {
-      // Frontend validation
-      if (!this.validName || !this.validPhone || this.cart.length === 0) {
+      // Frontend validation (including fake payment)
+      if (this.checkoutDisabled) {
         return;
       }
       if (this.isCheckingOut) {
