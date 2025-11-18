@@ -1,167 +1,265 @@
 /* --- Global Styles & Variables --- */
 :root {
-    --primary-color: #673ab7; /* A nice deep purple */
-    --primary-light: #d1c4e9;
-    --accent-color: #ff9800;  /* A vibrant orange for buttons */
-    --accent-hover: #f57c00;
-    --text-color: #333;
-    --white-color: #ffffff;
-    --border-color: #e0e0e0;
-    --shadow-color: rgba(0, 0, 0, 0.1);
+  --primary-color: #673ab7; /* A nice deep purple */
+  --primary-light: #d1c4e9;
+  --accent-color: #ff9800; /* A vibrant orange for buttons */
+  --accent-hover: #f57c00;
+  --text-color: #333;
+  --white-color: #ffffff;
+  --border-color: #e0e0e0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    /* --- Background Image Settings --- */
-    background-image: url('assets/background.webp');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  /* --- Background Image Settings --- */
+  background-image: url('assets/background.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 
-    color: var(--text-color);
-    margin: 0;
-    padding: 40px 20px; /* Add padding to body so container isn't stuck to edges */
-    line-height: 1.6;
+  color: var(--text-color);
+  margin: 0;
+  padding: 40px 20px; /* Add padding to body so container isn't stuck to edges */
+  line-height: 1.6;
 }
 
 #app {
-    max-width: 1100px;
-    margin: 0 auto; /* Center the container */
-    /* --- REMOVED solid background, ADDED transparency --- */
-    background: transparent; /* Make the container see-through */
-    border-radius: 0; /* Remove rounded corners for a cleaner look */
-    box-shadow: none; /* Remove the shadow from the main container */
-    overflow: visible; /* Allow card shadows to be visible */
+  max-width: 1100px;
+  margin: 0 auto; /* Center the container */
+  /* --- REMOVED solid background, ADDED transparency --- */
+  background: transparent; /* Make the container see-through */
+  border-radius: 0; /* Remove rounded corners for a cleaner look */
+  box-shadow: none; /* Remove the shadow from the main container */
+  overflow: visible; /* Allow card shadows to be visible */
 }
 
 /* --- Header Toolbar --- */
 .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    background-color: var(--primary-color);
-    color: var(--white-color);
-    border-radius: 12px; /* Add rounded corners to the toolbar */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    margin-bottom: 40px; /* Add space between toolbar and lesson cards */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 30px;
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border-radius: 12px; /* Add rounded corners to the toolbar */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: 40px; /* Add space between toolbar and lesson cards */
+}
+
+/* Make left side (title + controls) wrap nicely on smaller widths */
+.sorter,
+.search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
 }
 
 .toolbar h2 {
-    margin: 0;
-    font-size: 1.6em;
-    font-weight: 700;
+  margin: 0;
+  font-size: 1.6em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* Icon spacing */
+.toolbar h2 i,
+.lesson .title i,
+.btn i {
+  margin-right: 6px;
+}
+
+/* Sort & search inputs */
 .sorter select {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--primary-light);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-light);
+  background-color: var(--white-color);
+}
+
+.search input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-light);
+  min-width: 220px;
+}
+
+/* Small "Searching..." indicator */
+.search-status {
+  font-size: 0.9em;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 /* --- Main Content Area (Lesson Grid) --- */
 main {
-    padding: 0; /* Remove padding from main, we'll pad cards directly */
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
+  padding: 0; /* Remove padding from main, we'll pad cards directly */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
 }
 
 /* --- General Button Styles --- */
 .btn {
-    background-color: var(--accent-color);
-    color: var(--white-color);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
+  background-color: var(--accent-color);
+  color: var(--white-color);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn:hover:not(:disabled) {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* --- Lesson Card Styles --- */
 .lesson {
-    background: var(--white-color);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--white-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .lesson:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
 .lesson .title {
-    font-weight: 700;
-    font-size: 1.25em;
-    color: var(--primary-color);
-    margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 1.25em;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .lesson .meta {
-    color: #555;
-    font-size: 1em;
-    margin-bottom: 20px;
+  color: #555;
+  font-size: 1em;
+  margin-bottom: 20px;
 }
 
 /* --- Cart & Checkout Styles --- */
 main.cart-view {
-    display: block;
-    background: var(--white-color);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  display: block;
+  background: var(--white-color);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.cart-view h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Cart list */
+.cart-list {
+  padding: 0;
+  margin: 0;
 }
 
 .cart-list li {
-    list-style: none;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--border-color);
+  list-style: none;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+/* New: cart total line */
+.cart-total {
+  font-weight: 700;
+  font-size: 1.1em;
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* Checkout form */
 hr {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 30px 0;
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 30px 0;
 }
 
-form input {
-    width: calc(100% - 28px);
-    padding: 14px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.field input {
+  width: calc(100% - 28px);
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 6px;
+}
+
+/* Confirmation message */
+#confirmation-message {
+  margin-top: 16px;
+  font-weight: 600;
 }
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
-    body {
-        padding: 20px 10px;
-    }
-    .toolbar {
-        flex-direction: column;
-        gap: 15px;
-    }
-    main {
-        gap: 20px;
-        grid-template-columns: 1fr;
-    }
+  body {
+    padding: 20px 10px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sorter,
+  .search {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .search input {
+    width: 100%;
+  }
+
+  main {
+    gap: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  main.cart-view {
+    padding: 20px;
+  }
 }
