@@ -59,7 +59,7 @@
             placeholder="Search by subject or location"
           />
         </label>
-        <!-- Optional tiny indicator when a backend search is running -->
+        <!-- Tiny indicator when a backend search is running -->
         <span v-if="isSearching" class="search-status">Searching...</span>
       </div>
 
@@ -68,7 +68,10 @@
         :disabled="cart.length === 0"
         @click="showCart = !showCart"
       >
-        <i class="fa-solid" :class="showCart ? 'fa-arrow-left' : 'fa-cart-shopping'"></i>
+        <i
+          class="fa-solid"
+          :class="showCart ? 'fa-arrow-left' : 'fa-cart-shopping'"
+        ></i>
         {{ showCart ? 'Back to Lessons' : ('Cart (' + cart.length + ')') }}
       </button>
     </header>
@@ -95,7 +98,7 @@
         </button>
       </section>
 
-      <!-- Optional: message if no lessons after search -->
+      <!-- Message if no lessons after search -->
       <p v-if="sortedLessons.length === 0">
         No lessons found. Try a different search.
       </p>
@@ -118,6 +121,11 @@
         <li v-if="cart.length === 0">Cart is empty.</li>
       </ul>
 
+      <!-- New: cart total -->
+      <p v-if="cart.length > 0" class="cart-total">
+        Total: £{{ cartTotal }}
+      </p>
+
       <hr />
       <h3>Checkout</h3>
       <form @submit.prevent="checkout">
@@ -131,9 +139,9 @@
         </label>
         <button
           class="btn"
-          :disabled="!validName || !validPhone || cart.length === 0"
+          :disabled="!validName || !validPhone || cart.length === 0 || isCheckingOut"
         >
-          Checkout
+          {{ isCheckingOut ? 'Processing...' : 'Checkout' }}
         </button>
       </form>
       <p v-if="confirmation" id="confirmation-message">
