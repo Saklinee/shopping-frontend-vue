@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>After School Classes</title>
+  <!-- Optional Bootstrap CDN allowed by coursework (can enable later) -->
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="./styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.8/dist/vue.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header class="toolbar">
+      <h2>Lessons</h2>
+
+      <div class="sorter" v-if="!showCart">
+        <label>
+          Sort by:
+          <select v-model="sortBy">
+            <option value="topic">Subject</option>
+            <option value="location">Location</option>
+            <option value="price">Price</option>
+            <option value="space">Spaces</option>
+          </select>
+        </label>
+        <label>
+          Order:
+          <select v-model="sortDir">
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+          </select>
+        </label>
+      </div>
+
+      <button class="btn" :disabled="cart.length===0" @click="showCart = !showCart">
+        {{ showCart ? 'Back to Lessons' : ('Cart (' + cart.length + ')') }}
+      </button>
+    </header>
+
+    <main v-if="!showCart">
+      <!-- Changed lesson.id to lesson._id -->
+      <section class="lesson" v-for="lesson in sortedLessons" :key="lesson._id">
+        <div>
+          <div class="title">{{ lesson.topic }} - {{ lesson.location }}</div>
+          <div class="meta">£{{ lesson.price }} - Spaces: {{ lesson.space }}</div>
+        </div>
+        <button class="btn" :disabled="lesson.space===0" @click="addToCart(lesson)">Add to Cart</button>
+      </section>
+    </main>
+
+    <main v-else class="cart-view">
+      <h3>Shopping Cart</h3>
+      <ul class="cart-list">
+        <!-- Changed item.id to item._id -->
+        <li v-for="(item, idx) in cart" :key="item._id">
+          {{ item.topic }} - {{ item.location }} - £{{ item.price }}
+          <button class="btn" @click="removeFromCart(idx)">Remove</button>
+        </li>
+        <li v-if="cart.length===0">Cart is empty.</li>
+      </ul>
+
+      <hr/>
+      <h3>Checkout</h3>
+      <form @submit.prevent="checkout">
+        <label class="field">
+          Name:
+          <input v-model="customer.name" placeholder="Letters only"/>
+        </label>
+        <label class="field">
+          Phone:
+          <input v-model="customer.phone" placeholder="Numbers only"/>
+        </label>
+        <button class="btn" :disabled="!validName || !validPhone || cart.length===0">
+          Checkout
+        </button>
+      </form>
+      <p v-if="confirmation" id="confirmation-message">{{ confirmation }}</p>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
