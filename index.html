@@ -121,7 +121,7 @@
         <li v-if="cart.length === 0">Cart is empty.</li>
       </ul>
 
-      <!-- New: cart total -->
+      <!-- Cart total -->
       <p v-if="cart.length > 0" class="cart-total">
         Total: £{{ cartTotal }}
       </p>
@@ -129,18 +129,58 @@
       <hr />
       <h3>Checkout</h3>
       <form @submit.prevent="checkout">
+        <!-- Customer details -->
         <label class="field">
           Name:
           <input v-model="customer.name" placeholder="Letters only" />
         </label>
+        <p v-if="customer.name && !validName" class="field-error">
+          Name must contain letters and spaces only.
+        </p>
+
         <label class="field">
           Phone:
           <input v-model="customer.phone" placeholder="Numbers only" />
         </label>
-        <button
-          class="btn"
-          :disabled="!validName || !validPhone || cart.length === 0 || isCheckingOut"
-        >
+        <p v-if="customer.phone && !validPhone" class="field-error">
+          Phone must contain digits only.
+        </p>
+
+        <!-- Fake payment details (front-end demo only) -->
+        <h4>Payment details (demo only)</h4>
+        <p class="field-hint">
+          This is a simulated payment form for coursework; no real payment is
+          processed.
+        </p>
+
+        <label class="field">
+          Card number:
+          <input
+            v-model="payment.cardNumber"
+            placeholder="1234 5678 9012 3456"
+          />
+        </label>
+        <p v-if="payment.cardNumber && !validCard" class="field-error">
+          Enter a 16-digit card number (you can use any digits, demo only).
+        </p>
+
+        <label class="field">
+          Expiry (MM/YY):
+          <input v-model="payment.expiry" placeholder="08/27" />
+        </label>
+        <p v-if="payment.expiry && !validExpiry" class="field-error">
+          Enter a valid month and year in the format MM/YY.
+        </p>
+
+        <label class="field">
+          CVC:
+          <input v-model="payment.cvc" placeholder="123" />
+        </label>
+        <p v-if="payment.cvc && !validCvc" class="field-error">
+          Enter a 3 or 4 digit CVC.
+        </p>
+
+        <button class="btn" :disabled="checkoutDisabled">
           {{ isCheckingOut ? 'Processing...' : 'Checkout' }}
         </button>
       </form>
