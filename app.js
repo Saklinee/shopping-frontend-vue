@@ -16,6 +16,8 @@ new Vue({
     // Flags for backend search
     isSearching: false,
     searchTimeoutId: null,
+    // Flag to prevent double checkout
+    isCheckingOut: false,
     // Your Render backend URL
     apiBaseUrl: 'https://shopping-backend-express.onrender.com'
   },
@@ -76,51 +78,80 @@ new Vue({
         lessonInList.space++;
       }
     },
-    async checkout() {
-      if (!this.validName || !this.validPhone || this.cart.length === 0) {
-        return; // Prevent checkout if validation fails
-      }
 
-      // 1. Prepare the order payload
-      const order = {
+    // ----- Checkout helpers -----
+
+    buildOrderPayload() {
+      return {
         name: this.customer.name,
         phone: this.customer.phone,
         items: this.cart.map(item => ({ lessonId: item._id, qty: 1 }))
       };
+    },
+
+    async sendOrder(order) {
+      const response = await fetch(`${this.apiBaseUrl}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create order.');
+      }
+      return response.json(); // in case you want the saved order later
+    },
+
+    async updateLessonSpaces() {
+      const updatePromises = this.cart.map(lesson => {
+        // The space was already reduced on the client, so the server just needs to save it.
+        return fetch(`${this.apiBaseUrl}/lessons/${lesson._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ space: lesson.space })
+        });
+      });
+      await Promise.all(updatePromises);
+    },
+
+    handleCheckoutSuccess() {
+      this.confirmation = 'Your order has been placed!';
+      this.cart = [];
+      this.customer.name = '';
+      this.customer.phone = '';
+    },
+
+    handleCheckoutError(error) {
+      this.confirmation = `Checkout failed: ${error.message}. Please refresh and try again.`;
+      console.error('Checkout error:', error);
+    },
+
+    async checkout() {
+      // Frontend validation
+      if (!this.validName || !this.validPhone || this.cart.length === 0) {
+        return;
+      }
+      if (this.isCheckingOut) {
+        return; // prevent double submit
+      }
+
+      this.isCheckingOut = true;
+      this.confirmation = '';
+
+      const order = this.buildOrderPayload();
 
       try {
-        // 2. Post the new order to the backend
-        const orderResponse = await fetch(`${this.apiBaseUrl}/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
-        });
-
-        if (!orderResponse.ok) throw new Error('Failed to create order.');
-
-        // 3. Update the space for each lesson in the cart
-        const updatePromises = this.cart.map(lesson => {
-          // The space was already reduced on the client, so the server just needs to save it.
-          return fetch(`${this.apiBaseUrl}/lessons/${lesson._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ space: lesson.space })
-          });
-        });
-
-        await Promise.all(updatePromises);
-
-        // 4. Handle success
-        this.confirmation = 'Your order has been placed!';
-        this.cart = []; // Clear the cart
-        this.customer.name = '';
-        this.customer.phone = '';
-        // No need to call fetchLessons() again, as client-side data is now in sync.
+        await this.sendOrder(order);
+        await this.updateLessonSpaces();
+        this.handleCheckoutSuccess();
       } catch (error) {
-        this.confirmation = `Checkout failed: ${error.message}. Please refresh and try again.`;
-        console.error('Checkout error:', error);
+        this.handleCheckoutError(error);
+      } finally {
+        this.isCheckingOut = false;
       }
     },
+
+    // ----- Data fetching -----
+
     // Fetch all lessons (used on initial load and when search box is cleared)
     async fetchLessons() {
       try {
@@ -131,6 +162,7 @@ new Vue({
         console.error('Fetch lessons error:', error);
       }
     },
+
     // Fetch lessons from the backend /search route
     async fetchSearchResults() {
       const q = this.searchText.trim();
