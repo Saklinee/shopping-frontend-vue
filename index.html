@@ -65,7 +65,7 @@
 
       <button
         class="btn"
-        :disabled="cart.length === 0"
+        :disabled="!showCart && cart.length === 0"
         @click="showCart = !showCart"
       >
         <i
@@ -184,9 +184,17 @@
           {{ isCheckingOut ? 'Processing...' : 'Checkout' }}
         </button>
       </form>
-      <p v-if="confirmation" id="confirmation-message">
-        {{ confirmation }}
-      </p>
+
+      <!-- CONFIRMATION MESSAGE AREA -->
+      <div v-if="confirmation" id="confirmation-message" style="margin-top: 20px; padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; text-align: center;">
+        <p style="font-weight: bold; color: #155724; margin-bottom: 10px;">{{ confirmation }}</p>
+        
+        <!-- BUTTON TO GO BACK MANUALLY -->
+        <button @click="returnToMainPage" class="btn">
+          <i class="fa-solid fa-arrow-left"></i> Return to Lessons
+        </button>
+      </div>
+
     </main>
   </div>
 

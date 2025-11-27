@@ -10,7 +10,7 @@ new Vue({
       name: '',
       phone: ''
     },
-    // New: fake payment details (front-end only)
+    // Fake payment details (front-end only, demo)
     payment: {
       cardNumber: '',
       expiry: '',
@@ -45,31 +45,30 @@ new Vue({
       // Regex to allow only numbers
       return /^\d+$/.test(this.customer.phone);
     },
-    // New: total value of items in the cart
+    // Total value of items in the cart
     cartTotal() {
-      // Sum of lesson prices; adjust if you later add quantity
       return this.cart.reduce(
         (sum, item) => sum + Number(item.price || 0),
         0
       );
     },
-    // New: fake card number validation (16 digits, spaces allowed)
+    // Fake card number validation (16 digits, spaces allowed)
     validCard() {
       const digits = this.payment.cardNumber.replace(/\s+/g, '');
       return /^\d{16}$/.test(digits);
     },
-    // New: fake expiry validation (MM/YY, 01–12)
+    // Fake expiry validation (MM/YY, 01–12)
     validExpiry() {
       const match = /^(\d{2})\/(\d{2})$/.exec(this.payment.expiry);
       if (!match) return false;
       const month = Number(match[1]);
       return month >= 1 && month <= 12;
     },
-    // New: fake CVC validation (3–4 digits)
+    // Fake CVC validation (3–4 digits)
     validCvc() {
       return /^\d{3,4}$/.test(this.payment.cvc);
     },
-    // New: single place to control when checkout button is disabled
+    // Single place to control when checkout button is disabled
     checkoutDisabled() {
       return (
         !this.validName ||
@@ -141,7 +140,7 @@ new Vue({
       if (!response.ok) {
         throw new Error('Failed to create order.');
       }
-      return response.json(); // in case you want the saved order later
+      return response.json();
     },
 
     async updateLessonSpaces() {
@@ -156,15 +155,29 @@ new Vue({
       await Promise.all(updatePromises);
     },
 
+    // --- FIXED METHOD START ---
     handleCheckoutSuccess() {
-      this.confirmation = 'Your order has been placed! (Demo payment processed)';
+      this.confirmation = 'Your order has been placed! Redirecting to lessons...';
       this.cart = [];
       this.customer.name = '';
       this.customer.phone = '';
       this.payment.cardNumber = '';
       this.payment.expiry = '';
       this.payment.cvc = '';
+
+      // Automatically go back to main page after 3 seconds
+      setTimeout(() => {
+        this.returnToMainPage();
+      }, 3000);
     },
+
+    // New helper method to reset the view
+    returnToMainPage() {
+      this.showCart = false;
+      this.confirmation = '';
+      this.fetchLessons(); // Refresh stock data
+    },
+    // --- FIXED METHOD END ---
 
     handleCheckoutError(error) {
       this.confirmation = `Checkout failed: ${error.message}. Please refresh and try again.`;
@@ -236,4 +249,3 @@ new Vue({
     this.fetchLessons();
   }
 });
-
