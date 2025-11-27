@@ -10,25 +10,19 @@ new Vue({
       name: '',
       phone: ''
     },
-    // Fake payment details (front-end only, demo)
     payment: {
       cardNumber: '',
       expiry: '',
       cvc: ''
     },
     confirmation: '',
-    // Search text from the input
     searchText: '',
-    // Flags for backend search
     isSearching: false,
     searchTimeoutId: null,
-    // Flag to prevent double checkout
     isCheckingOut: false,
-    // Your Render backend URL
     apiBaseUrl: 'https://shopping-backend-express.onrender.com'
   },
   computed: {
-    // Sorts the lessons returned from the backend (all or search results)
     sortedLessons() {
       return [...this.lessons].sort((a, b) => {
         const modifier = this.sortDir === 'asc' ? 1 : -1;
@@ -38,37 +32,30 @@ new Vue({
       });
     },
     validName() {
-      // Regex to allow only letters and spaces
       return /^[A-Za-z\s]+$/.test(this.customer.name);
     },
     validPhone() {
-      // Regex to allow only numbers
       return /^\d+$/.test(this.customer.phone);
     },
-    // Total value of items in the cart
     cartTotal() {
       return this.cart.reduce(
         (sum, item) => sum + Number(item.price || 0),
         0
       );
     },
-    // Fake card number validation (16 digits, spaces allowed)
     validCard() {
       const digits = this.payment.cardNumber.replace(/\s+/g, '');
       return /^\d{16}$/.test(digits);
     },
-    // Fake expiry validation (MM/YY, 01–12)
     validExpiry() {
       const match = /^(\d{2})\/(\d{2})$/.exec(this.payment.expiry);
       if (!match) return false;
       const month = Number(match[1]);
       return month >= 1 && month <= 12;
     },
-    // Fake CVC validation (3–4 digits)
     validCvc() {
       return /^\d{3,4}$/.test(this.payment.cvc);
     },
-    // Single place to control when checkout button is disabled
     checkoutDisabled() {
       return (
         !this.validName ||
@@ -82,48 +69,57 @@ new Vue({
     }
   },
   watch: {
-    // Search-as-you-type using the backend /search route
     searchText(newVal) {
       const q = newVal.trim();
-
-      // Clear any pending search to implement debounce
       if (this.searchTimeoutId) {
         clearTimeout(this.searchTimeoutId);
       }
-
-      // If search box is empty, reload all lessons
       this.searchTimeoutId = setTimeout(() => {
         if (!q) {
           this.fetchLessons();
         } else {
           this.fetchSearchResults();
         }
-      }, 300); // 300ms debounce
+      }, 300);
     }
   },
   methods: {
     addToCart(lesson) {
-      // Find the lesson in the main list to ensure we have the latest data
       const lessonInList = this.lessons.find(item => item._id === lesson._id);
       if (lessonInList && lessonInList.space > 0) {
         this.cart.push(lesson);
-        // Reduce space on the client-side for immediate feedback
         lessonInList.space--;
       }
     },
     removeFromCart(index) {
       const removedItem = this.cart.splice(index, 1)[0];
-      // Find the lesson in the main list and restore its space
       const lessonInList = this.lessons.find(item => item._id === removedItem._id);
       if (lessonInList) {
         lessonInList.space++;
       }
     },
 
-    // ----- Checkout helpers -----
+    // --- UPDATED ICON FUNCTION (Matches keywords inside the name) ---
+    getLessonIcon(topic) {
+      const t = topic.toLowerCase();
+      
+      if (t.includes('math') || t.includes('algebra') || t.includes('geometry') || t.includes('calculus')) return 'fa-calculator';
+      if (t.includes('biology')) return 'fa-dna';
+      if (t.includes('chemistry')) return 'fa-flask';
+      if (t.includes('physics')) return 'fa-atom';
+      if (t.includes('science')) return 'fa-flask'; // fallback for general science
+      if (t.includes('english') || t.includes('writing') || t.includes('literature')) return 'fa-pen-nib';
+      if (t.includes('art') || t.includes('design')) return 'fa-palette';
+      if (t.includes('history')) return 'fa-landmark';
+      if (t.includes('geography')) return 'fa-earth-americas';
+      if (t.includes('computer') || t.includes('code') || t.includes('ict')) return 'fa-laptop-code';
+      if (t.includes('music')) return 'fa-music';
+      if (t.includes('sport') || t.includes('pe') || t.includes('fitness')) return 'fa-futbol';
+      
+      return 'fa-book-open'; // Default icon
+    },
 
     buildOrderPayload() {
-      // Note: payment details are NOT sent to the backend (demo only)
       return {
         name: this.customer.name,
         phone: this.customer.phone,
@@ -145,7 +141,6 @@ new Vue({
 
     async updateLessonSpaces() {
       const updatePromises = this.cart.map(lesson => {
-        // The space was already reduced on the client, so the server just needs to save it.
         return fetch(`${this.apiBaseUrl}/lessons/${lesson._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -155,7 +150,6 @@ new Vue({
       await Promise.all(updatePromises);
     },
 
-    // --- FIXED METHOD START ---
     handleCheckoutSuccess() {
       this.confirmation = 'Your order has been placed! Redirecting to lessons...';
       this.cart = [];
@@ -165,19 +159,16 @@ new Vue({
       this.payment.expiry = '';
       this.payment.cvc = '';
 
-      // Automatically go back to main page after 3 seconds
       setTimeout(() => {
         this.returnToMainPage();
       }, 3000);
     },
 
-    // New helper method to reset the view
     returnToMainPage() {
       this.showCart = false;
       this.confirmation = '';
-      this.fetchLessons(); // Refresh stock data
+      this.fetchLessons();
     },
-    // --- FIXED METHOD END ---
 
     handleCheckoutError(error) {
       this.confirmation = `Checkout failed: ${error.message}. Please refresh and try again.`;
@@ -185,12 +176,11 @@ new Vue({
     },
 
     async checkout() {
-      // Frontend validation (including fake payment)
       if (this.checkoutDisabled) {
         return;
       }
       if (this.isCheckingOut) {
-        return; // prevent double submit
+        return;
       }
 
       this.isCheckingOut = true;
@@ -209,9 +199,6 @@ new Vue({
       }
     },
 
-    // ----- Data fetching -----
-
-    // Fetch all lessons (used on initial load and when search box is cleared)
     async fetchLessons() {
       try {
         const response = await fetch(`${this.apiBaseUrl}/lessons`);
@@ -222,11 +209,9 @@ new Vue({
       }
     },
 
-    // Fetch lessons from the backend /search route
     async fetchSearchResults() {
       const q = this.searchText.trim();
       if (!q) {
-        // If search text was cleared while this was queued, just load all lessons
         return this.fetchLessons();
       }
 
@@ -245,7 +230,6 @@ new Vue({
     }
   },
   mounted() {
-    // Fetch the initial list of lessons when the app loads
     this.fetchLessons();
   }
 });
